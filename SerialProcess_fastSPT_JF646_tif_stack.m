@@ -15,8 +15,12 @@ clear; clc; close all; clearvars -global
 %   into the tracking part of the MTT algorithm (Part 2). 
 
 %%%%%%%%%%%%%%%%%%%% DEFINE INPUT AND OUTPUT PATHS %%%%%%%%%%%%%%%%%%%%%%%%
+% Acuire working directory path
+workdir = cd;
 % Specify input path with Tiff stack files: The path written as one of the
 input_path = uigetdir('C:\Users\Bewersdorf\Desktop\Lukas Fuentes\Data', 'Select Input Data Folder');
+% Add path to input Tiff Stacks
+addpath(input_path);
 % Specify output path for results
 output_path= uigetdir('C:\Users\Bewersdorf\Desktop\Lukas Fuentes\Data', 'Select Output Folder');
 % uigetdir functions parameters needs to be changed to be specific to your
@@ -168,9 +172,10 @@ for iter = 3:length(Filenames)
     % eval(['mkdir ' output_path ' Results_' num2str(iter);])
     % save_name = fullfile(output_path, Filenames{iter}, '_Tracked.mat');
     % save(save_name, 'trackedPar', 'settings');
-    save([output_path, Filenames{iter}, '_Tracked.mat'], 'trackedPar', 'settings');
+    cd(output_path);
+    save([Filenames{iter}, '_Tracked.mat'], 'trackedPar', 'settings');
+    cd(workdir);
     toc;
     clear imgs_3d_matrix imgs_3d_double data_cell_array trackedPar save_name
     disp('-----------------------------------------------------------------');
-end    
-
+end
