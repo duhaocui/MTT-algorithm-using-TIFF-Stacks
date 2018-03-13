@@ -49,8 +49,8 @@ NumGapsAllowed = 1; % the number of gaps allowed in trajectories
 
 %%% DEFINE STRUCTURED ARRAY WITH ALL THE SPECIFIC SETTINGS FOR LOC AND TRACK
 % imaging parameters
-impars.PixelSize=0.16; % um per pixel
-impars.psf_scale=1.35; % PSF scaling
+impars.PixelSize=0.103; % um per pixel
+impars.psf_scale=1.3; % PSF scaling
 impars.wvlnth= EmissionWavelength/1000; %emission wavelength in um
 impars.NA=1.49; % NA of detection objective
 impars.psfStd= impars.psf_scale*0.55*(impars.wvlnth)/impars.NA/1.17/impars.PixelSize/2; % PSF standard deviation in pixels
