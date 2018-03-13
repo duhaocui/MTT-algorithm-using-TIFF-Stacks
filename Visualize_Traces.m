@@ -9,24 +9,51 @@ Inputs:
 - Particle Trajectories in Ander's Format (described above)
 
 Outputs:
-- Traces of the particle trajectories
+- A figure for each trackedPar structure input (presumably equal to the
+number of cells you imaged) with all the trajectories of particles tracked
+for that trackedPar structure.
 %}
 
 % Specify input path for trajectory structures
 input_path2 = uigetdir('C:\Users\Bewersdorf\Desktop\Lukas Fuentes\Data', 'Select Input Data Folder');
+% Acquire working directory
+workdir2 = cd;
 % Add input file path
 addpath(input_path2);
-% Load data from input path
+% Load files from input path
 files2 = dir(input_path2);
-%Filenames2 = ''; %for saving the actual file name
 
+% Load trajectory structures into cell array
 % 'a' starts at 3 to skip the first two columns in 'files' which are
 % essentially empty and unavoidable (some weird Windows thing?)
-%{
+Data = {};
+counter = 1;
 for a = 3:length(files2)
-    %Filenames2{a-2} = files2(a).name(1:end);
-    s = load(files2(a).name);
-    disp(s);
+    if files2(a).name(end-2:end) == 'mat'; % Only loads .mat files
+        Data{counter,1} = load(files2(a).name);
+        counter = counter + 1;
+    end
 end
-%}
-s = load(files2(3:4).name);
+
+% Plot trajectories
+Dleng = (1:length(Data)); % Vector used for title and figure names
+plot_title = 'Trajectories in cell #%d';
+% Loop over the number of cells/trackPar structures (b), then loop over
+% number of trajectories in each trackPar structure (c) and plot each
+% trajectory. One figure for each cell will output.
+for b = 1:length(Data);
+    figure(b);hold on;
+    for c = 1:length(Data{b,1}.trackedPar);
+        if length(Data{b,1}.trackedPar(c).xy) >= 50; % Adjust threshold to only plot trajectories longer than specified length (in frames)
+            plot(Data{b,1}.trackedPar(c).xy(:,1), Data{b,1}.trackedPar(c).xy(:,2));
+        end
+    end
+    % Label axes and title, then save plot in same directory as input files
+    xlabel('x-position (\mum)');
+    ylabel('y-position (\mum)');
+    title(sprintf(plot_title, Dleng(b)));
+    cd(input_path2);
+    saveas(gcf, sprintf(plot_title, Dleng(b)));
+    cd(workdir2);
+    hold off;
+end
