@@ -23,13 +23,13 @@ addpath(input_path2);
 % Load files from input path
 files2 = dir(input_path2);
 
-% Load trajectory structures into cell array
+%%% Load trajectory structures into cell array %%%
 % 'a' starts at 3 to skip the first two columns in 'files' which are
 % essentially empty and unavoidable (some weird Windows thing?)
 Data = {};
 counter = 1;
 for a = 3:length(files2)
-    if files2(a).name(end-2:end) == 'mat'; % Only loads .mat files
+    if files2(a).name(end-2:end) == 'mat' % Only loads .mat files
         Data{counter,1} = load(files2(a).name);
         counter = counter + 1;
     end
@@ -41,10 +41,10 @@ plot_title = 'Trajectories in cell #%d';
 % Loop over the number of cells/trackPar structures (b), then loop over
 % number of trajectories in each trackPar structure (c) and plot each
 % trajectory. One figure for each cell will output.
-for b = 1:length(Data);
+for b = 1:length(Data)
     figure();hold on;
-    for c = 1:length(Data{b,1}.trackedPar);
-        if length(Data{b,1}.trackedPar(c).xy) >= 50; % Adjust threshold to only plot trajectories longer than specified length (in frames)
+    for c = 1:length(Data{b,1}.trackedPar)
+        if length(Data{b,1}.trackedPar(c).xy) >= 50 % Adjust threshold to only plot trajectories longer than specified length (in frames)
             plot(Data{b,1}.trackedPar(c).xy(:,1), Data{b,1}.trackedPar(c).xy(:,2));
         end
     end
@@ -64,13 +64,15 @@ end
 L = 50; % Minimum number of frames (trajectories below this threshold will be ignored)
 alpha_bin = 20; % Bin size for alpha histogram
 diff_bin = 50; % Bin size for alpha histogram
-for d = 1:length(Data);
+for d = 1:length(Data)
     data_msd = {};
     data_msd = {Data{d,1}.trackedPar.TimeStamp; Data{d,1}.trackedPar.xy}';
-    MSD = get_msd_v2(data_msd,d,L,alpha_bin,diff_bin);
+    MSD = get_msd_v2(data_msd,d,L,alpha_bin,diff_bin);%,input_path2,workdir);
 end
 
-%%
+%% 
+% This section is the same as the get_msd_v2 function with some tweaked variables for testing (ignore if you are just analyzing data;
+% this part is only used for testing if you are editing the code).
 figure(); hold on;
 x = [];
 y = [];
