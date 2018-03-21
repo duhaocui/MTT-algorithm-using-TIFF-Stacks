@@ -1,4 +1,5 @@
-function MSD = get_msd_v2(data_msd,n,L,alpha_bin,diff_bin)
+
+function MSD = get_msd_v2(data_msd,n,L,alpha_bin,diff_bin)%input_path,workdir)
 figure(); hold on;
 x = [];
 y = [];
@@ -44,6 +45,11 @@ xlabel('log(time(ms))');
 ylabel('log(MSD(\mum^2))');
 title(sprintf('Cell #%d', n));
 hold off;
+%{
+cd(input_path);
+saveas(gcf,[input_path '/subFolderName/myFig.fig']);
+cd(workdir);
+%}
 figure(); hold on;
 histogram(alpha,alpha_bin);
 xlabel('\alpha');
