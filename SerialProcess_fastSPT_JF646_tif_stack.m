@@ -41,7 +41,7 @@ end
 %%% Parameters of particle tracking %%%
 LocalizationError = -6.25; % Localization Error: -6 = 10^-6
 EmissionWavelength = 664; % wavelength in nm; consider emission max and filter cutoff
-ExposureTime = 20; % in milliseconds
+ExposureTime = 4; % in milliseconds
 NumDeflationLoops = 0; % Generaly keep this to 0; if you need deflation loops, you are imaging at too high a density;
 MaxExpectedD = 10; % The maximal expected diffusion constant for tracking in units of um^2/s;
 NumGapsAllowed = 1; % the number of gaps allowed in trajectories
