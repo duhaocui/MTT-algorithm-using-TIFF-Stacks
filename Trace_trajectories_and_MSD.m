@@ -23,6 +23,11 @@ addpath(input_path2);
 % Load files from input path
 files2 = dir(input_path2);
 
+%%% Decide Parameters %%%
+L = 105; % Minimum number of frames (trajectories below this threshold will be ignored; must be greater than 1)
+alpha_bin = 20; % Bin size for alpha histogram
+diff_bin = 50; % Bin size for alpha histogram
+
 %%% Load trajectory structures into cell array %%%
 % 'a' starts at 3 to skip the first two columns in 'files' which are
 % essentially empty and unavoidable (some weird Windows thing?)
@@ -35,16 +40,16 @@ for a = 3:length(files2)
     end
 end
 
-% Plot trajectories
+%% Plot trajectories
 Dleng = (1:length(Data)); % Vector used for title and figure names
 plot_title = 'Trajectories in cell #%d';
 % Loop over the number of cells/trackPar structures (b), then loop over
 % number of trajectories in each trackPar structure (c) and plot each
 % trajectory. One figure for each cell will output.
 for b = 1:length(Data)
-    figure();hold on;
+    figure(b);hold on;
     for c = 1:length(Data{b,1}.trackedPar)
-        if length(Data{b,1}.trackedPar(c).xy) >= 50 % Adjust threshold to only plot trajectories longer than specified length (in frames)
+        if length(Data{b,1}.trackedPar(c).xy) >= L % Adjust threshold to only plot trajectories longer than specified length (in frames)
             plot(Data{b,1}.trackedPar(c).xy(:,1), Data{b,1}.trackedPar(c).xy(:,2));
         end
     end
@@ -60,14 +65,11 @@ end
 
 %% Plot MSD and calculate Anomolous Diffusion Coefficient and alpha (power) from MSD ~ Dt^(alpha)
 
-%%% Decide Paramters %%%
-L = 50; % Minimum number of frames (trajectories below this threshold will be ignored)
-alpha_bin = 20; % Bin size for alpha histogram
-diff_bin = 50; % Bin size for alpha histogram
-for d = 1:length(Data)
+DL = length(Data);
+for d = 1:DL
     data_msd = {};
     data_msd = {Data{d,1}.trackedPar.TimeStamp; Data{d,1}.trackedPar.xy}';
-    MSD = get_msd_v2(data_msd,d,L,alpha_bin,diff_bin);%,input_path2,workdir);
+    MSD = get_msd_v2(data_msd,d,L,alpha_bin,diff_bin,DL);%,input_path2,workdir);
 end
 
 %% 
@@ -86,20 +88,21 @@ for a = 1:length(data_msd)
     x = [];
     y = [];
     time = [];
-    msd_plot = [];
     %inds_h = traces(:,4) == pd; % Boolean to find indices for specific cell track
     trace = [data_msd{a,1}, data_msd{a,2}(:,1), data_msd{a,2}(:,2)];
     x = trace(:,2);
     y = trace(:,3);
-    time = (trace(:,1)-(trace(1,1)-0.02))*1000; % Normalize times to all start at 0.02 seconds
-    dx = [];
-    dy = [];
+    time = (trace(:,1)-(trace(1,1)-0.02)); % Normalize times to all start at 0.02 seconds
+    %dx = [];
+    %dy = [];
     if length(time) > 10
+        %poop = time;
+        msd_plot = [];
         for t = 1:length(time)-1
             ind = t;
-            dx = x(1:end-ind) - x(1+ind:end);
+            dx = x(1:end-ind) - x(1+ind:end); % first loop; dx & dy are length(time)-1 long, and decrease by 1 each loop until both are 1 long
             dy = y(1:end-ind) - y(1+ind:end);
-            msdi = (mean((dx.^2)+(dy.^2)));
+            msdi = (mean((dx.^2)+(dy.^2))); %Used to be the mean of this but there is no difference
             MSD_ALL(t,counter) = msdi;
         end
         meanmsd = nanmean(MSD_ALL,2);
@@ -112,12 +115,26 @@ for a = 1:length(data_msd)
         diff = 10^(poly(2));
         DiffCo(1,counter) = diff;
         counter = counter + 1;
+        %disp(a);
     end
 end
+
 xlabel('log(time(ms))');
-ylabel('log(MSD(\mum^2))');
-title(sprintf('Cell #%d', d));
+ylabel('log(Squared Displacement(\mum^2))');
+title(sprintf('Cell #%d squared displacements', 1));
 hold off;
+%{
+cd(input_path);
+saveas(gcf,[input_path '/subFolderName/myFig.fig']);
+cd(workdir);
+%}
+figure(); hold on;
+plot_time = linspace(0,0.02,max_size(1))';
+plot(log10(plot_time(1:end-1)),log10(meanmsd(1:end-1)));
+xlabel('log(time(s))');
+ylabel('log(MSD(\mu^2))');
+title(sprintf('Cell #%d MSD', 1)); hold off;
+%{
 figure(); hold on;
 histogram(alpha,20);
 xlabel('\alpha');
@@ -128,4 +145,5 @@ histogram(DiffCo,20);
 xlabel('Diffusion coefficient');
 ylabel('Events');
 title(sprintf('Cell #%d diffusion coefficient distribution', d)); hold off;
+%}
 MSD = nanmean(MSD_ALL,2);
